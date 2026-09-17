@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Trị - JobConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Toàn bộ định dạng được gom lên đây để không bị cảnh báo */
+        body { padding: 20px; background: #f8fafc; font-family: sans-serif; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0 40px 0; }
+        .stat-card { background: white; padding: 25px; border-radius: 10px; border-left: 5px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-card h3 { font-size: 1.5rem; margin-top: 10px; color: #1e293b; }
+        .kyc-box, .dispute-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .text-danger { color: red; }
+        .text-warning { color: orange; }
+        
+        /* Các class thay thế cho inline-style */
+        .border-blue { border-left-color: #3b82f6; }
+        .border-green { border-left-color: #10b981; }
+        .border-red { border-left-color: #ef4444; }
+        .divider-main { margin-bottom: 30px; border-top: 1px solid #ccc; border-bottom: 0; border-left: 0; border-right: 0; }
+        .kyc-container { margin: 15px 0 40px 0; }
+        .dispute-container { margin-top: 15px; }
+        .btn-mt { margin-top: 10px; }
+        .dispute-box-red { border-left: 4px solid red; }
+    </style>
+</head>
+<body>
+
+    <h1>Bảng Điều Khiển Quản Trị Viên (Dashboard)</h1>
+    <a href="index.html" class="btn btn-secondary">Quay lại trang chính</a>
+    
+    <!-- KHU VỰC THỐNG KÊ -->
+    <div class="grid-3">
+        <div class="stat-card border-blue">
+            <p>Tổng Tài Khoản Hệ Thống</p>
+            <h3 id="stat-users">0</h3>
+        </div>
+        <div class="stat-card border-green">
+            <p>Tổng Việc Làm Đăng Tải</p>
+            <h3 id="stat-jobs">0</h3>
+        </div>
+        <div class="stat-card border-red">
+            <p>Tiền Ký Quỹ Đang Giữ Hộ</p>
+            <h3 id="stat-escrow" class="text-danger">0đ</h3>
+        </div>
+    </div>
+
+    <hr class="divider-main">
+
+    <!-- TÍNH NĂNG 1: DUYỆT CCCD (eKYC) -->
+    <h2>1. Danh sách chờ duyệt eKYC (Cấp Tích Xanh)</h2>
+    <div id="kyc-list" class="kyc-container">
+        <!-- Đổ JS vào -->
+    </div>
+
+    <!-- TÍNH NĂNG 2: GIẢI QUYẾT TRANH CHẤP -->
+    <h2>2. Báo Cáo Tranh Chấp Cần Xử Lý</h2>
+    <div id="dispute-list" class="dispute-container">
+        <!-- Đổ JS vào -->
+    </div>
+
+    <script>
+        async function loadAdminData() {
+            // Lấy dữ liệu thống kê
+            const resStats = await fetch('/api/admin/dashboard');
+            const data = await resStats.json();
+            
+            document.getElementById('stat-users').innerText = data.totalUsers;
+            document.getElementById('stat-jobs').innerText = data.totalJobs;
+            document.getElementById('stat-escrow').innerText = data.totalEscrowHold.toLocaleString() + 'đ';
+
+            // Hiển thị duyệt KYC
+            const kycContainer = document.getElementById('kyc-list');
+            if(data.kycPending.length === 0) {
+                kycContainer.innerHTML = "<p>Không có hồ sơ nào đang chờ duyệt.</p>";
+            } else {
+                kycContainer.innerHTML = data.kycPending.map(u => `
+                    <div class="kyc-box">
+                        <p><strong>Tài khoản:</strong> ${u.username}</p>
+                        <p>Trạng thái: <span class="text-warning">Đang chờ duyệt CCCD</span></p>
+                        <button class="btn btn-success btn-mt" onclick="approveKyc('${u.username}')">Duyệt - Cấp Tích Xanh</button>
+                    </div>
+                `).join('');
+            }
+
+            // Lấy dữ liệu Tranh chấp
+            const resJobs = await fetch('/api/jobs');
+            const jobs = await resJobs.json();
+            const disputedJobs = jobs.filter(j => j.status === 'disputed');
+            
+            const disputeContainer = document.getElementById('dispute-list');
+            if(disputedJobs.length === 0) {
+                disputeContainer.innerHTML = "<p>Mọi thứ ổn định. Không có tranh chấp.</p>";
+            } else {
+                disputeContainer.innerHTML = disputedJobs.map(job => `
+                    <div class="dispute-box dispute-box-red">
+                        <h3>${job.title}</h3>
+                        <p><strong>Lý do:</strong> <span class="text-danger">${job.disputeReason}</span></p>
+                        <p>Đang giữ: ${job.escrow}đ</p>
+                        <button class="btn btn-warning btn-mt" onclick="resolveDispute('${job.id}')">Hoàn tất xử lý & Hoàn tiền</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function approveKyc(username) {
+            await fetch('/api/admin/approve-kyc', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username}) });
+            alert('Đã cấp tích xanh cho ' + username + '!');
+            loadAdminData(); // Tải lại bảng
+        }
+
+        async function resolveDispute(jobId) {
+            await fetch('/api/admin/resolve', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({jobId}) });
+            alert('Đã xử lý tranh chấp!');
+            loadAdminData();
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>

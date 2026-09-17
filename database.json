@@ -1,0 +1,11 @@
+{
+  "users": {
+    "admin": { "username": "admin", "wallet": 500000, "reputation": 5, "role": "admin" },
+    "sinhvien1": { "username": "sinhvien1", "wallet": 100000, "reputation": 4.8, "role": "user" }
+  },
+  "jobs": [
+    { "id": "J01", "title": "Hỗ trợ sự kiện triển lãm SECC", "price": "300,000đ", "escrow": 50000, "status": "open", "location": "Quận 7", "category": "Sự kiện" },
+    { "id": "J02", "title": "Gia sư Toán lớp 5", "price": "150,000đ", "escrow": 30000, "status": "open", "location": "Quận 1", "category": "Gia sư" },
+    { "id": "J03", "title": "Nhập liệu văn bản", "price": "200,000đ", "escrow": 20000, "status": "disputed", "location": "Online", "category": "IT", "takenBy": "sinhvien1", "disputeReason": "Người thuê báo chưa nhận được file" }
+  ]
+}

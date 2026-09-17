@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - Nền Tảng Việc Làm Sinh Viên</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Thư viện icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* CSS cho Màn hình đăng nhập để không bị cảnh báo vàng (Inline styles) */
+        #login-overlay { position: fixed; inset: 0; background: #1e293b; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-title { color: var(--primary); margin-bottom: 20px; }
+        .login-subtitle { margin-bottom: 20px; color: var(--text-muted); }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        .login-btn { width: 100%; padding: 12px; justify-content: center; }
+        .login-btn-secondary { margin-top: 10px; }
+        .login-note { margin-top: 20px; font-size: 13px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH ĐĂNG NHẬP -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 class="login-title"><i class="fas fa-briefcase"></i> JobConnect</h2>
+            <p class="login-subtitle">Đăng nhập để kết nối việc làm</p>
+            
+            <input type="text" id="login-username" class="login-input" placeholder="Tên đăng nhập (VD: admin, sinhvien1)">
+            <input type="password" id="login-password" class="login-input" placeholder="Mật khẩu">
+            
+            <button onclick="submitLogin()" class="btn btn-primary login-btn">ĐĂNG NHẬP</button>
+            <button onclick="loginAsGuest()" class="btn btn-secondary login-btn login-btn-secondary">Vào xem với Tư cách Khách</button>
+            
+            <p class="login-note">(Tài khoản mới sẽ tự động được tạo. <br>Mật khẩu mặc định của Admin là: <b>123456</b>)</p>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Thanh điều hướng bên trái -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-briefcase"></i> JobConnect</h2>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active" data-target="dashboard"><i class="fas fa-home"></i> Tổng quan</a>
+                <a href="#" class="menu-item" data-target="verification"><i class="fas fa-id-card"></i> Xác thực & Bảo mật</a>
+                <a href="#" class="menu-item" data-target="job-market"><i class="fas fa-search-dollar"></i> Chợ việc làm (Ký quỹ)</a>
+                <a href="#" class="menu-item" data-target="reviews"><i class="fas fa-star"></i> Đánh giá uy tín</a>
+            </nav>
+            <div class="user-info">
+                <p>Số dư ví: <strong id="wallet-balance">500,000đ</strong></p>
+                <p>Điểm uy tín: <span class="rating-badge">4.9 <i class="fas fa-star"></i></span></p>
+            </div>
+        </aside>
+
+        <!-- Nội dung chính -->
+        <main class="main-content">
+            <!-- Màn hình Tổng quan -->
+            <section id="dashboard" class="page-section active">
+                <header class="section-header">
+                    <h1>Tổng quan tài khoản</h1>
+                </header>
+                <div class="status-cards">
+                    <div class="card card-warning">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Trạng thái xác thực</h3>
+                        <p id="auth-status">Chưa xác thực</p>
+                    </div>
+                    <div class="card card-success">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Việc đã hoàn thành</h3>
+                        <p>12 công việc</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Màn hình Xác thực -->
+            <section id="verification" class="page-section">
+                <header class="section-header">
+                    <h1>Xác thực danh tính eKYC</h1>
+                </header>
+                <div class="form-container">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Yêu cầu bắt buộc để chống lừa đảo và tạo sự tin cậy.
+                    </div>
+                    <form id="verify-form">
+                        <div class="form-group">
+                            <label for="fullname">Họ và tên theo CCCD</label>
+                            <input type="text" id="fullname" required placeholder="NGUYEN VAN A">
+                        </div>
+                        <div class="form-group">
+                            <label for="id-number">Số CCCD / Mã Sinh Viên</label>
+                            <input type="text" id="id-number" required placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label for="id-image">Tải ảnh mặt trước CCCD</label>
+                            <input type="file" id="id-image" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="btn-verify">
+                            <i class="fas fa-upload"></i> Gửi yêu cầu xác thực
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Màn hình Chợ việc làm (Ký quỹ) -->
+            <section id="job-market" class="page-section">
+                <header class="section-header">
+                    <h1>Danh sách công việc</h1>
+                    <p>Yêu cầu ký quỹ để cam kết không hủy việc ngang.</p>
+                </header>
+                <div class="job-list" id="job-list-container">
+                    <!-- JS sẽ render công việc vào đây -->
+                </div>
+            </section>
+
+            <!-- Màn hình Đánh giá -->
+            <section id="reviews" class="page-section">
+                <header class="section-header">
+                    <h1>Lịch sử & Đánh giá</h1>
+                </header>
+                <div class="review-list">
+                    <div class="review-item">
+                        <div class="job-title">Phục vụ quán Cafe sự kiện</div>
+                        <div class="partner-name">Người thuê: Trần Bình</div>
+                        <div class="rating-action">
+                            <span>Đánh giá đối tác:</span>
+                            <div class="stars" data-job="1">
+                                <i class="fas fa-star" data-value="1"></i>
+                                <i class="fas fa-star" data-value="2"></i>
+                                <i class="fas fa-star" data-value="3"></i>
+                                <i class="fas fa-star" data-value="4"></i>
+                                <i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Ký Quỹ -->
+    <div id="escrow-modal" class="modal">
+        <div class="modal-content">
+            <h2>Xác nhận Ký quỹ</h2>
+            <p>Hệ thống sẽ tạm khóa khoản tiền <strong id="escrow-amount" class="text-danger">0đ</strong> từ ví của bạn.</p>
+            <p>Tiền sẽ tự động hoàn trả khi công việc báo cáo hoàn thành.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                <button class="btn btn-primary" id="btn-confirm-escrow">Đồng ý & Nhận việc</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
