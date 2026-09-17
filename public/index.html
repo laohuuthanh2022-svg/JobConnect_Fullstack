@@ -21,19 +21,31 @@
 </head>
 <body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP & ĐĂNG KÝ -->
     <div id="login-overlay">
         <div class="login-box">
             <h2 class="login-title"><i class="fas fa-briefcase"></i> JobConnect</h2>
-            <p class="login-subtitle">Đăng nhập để kết nối việc làm</p>
             
-            <input type="text" id="login-username" class="login-input" placeholder="Tên đăng nhập (VD: admin, sinhvien1)">
-            <input type="password" id="login-password" class="login-input" placeholder="Mật khẩu">
+            <!-- FORM ĐĂNG NHẬP -->
+            <div id="form-login">
+                <p class="login-subtitle">Đăng nhập để kết nối việc làm</p>
+                <input type="text" id="login-username" class="login-input" placeholder="Tên đăng nhập (VD: admin, sinhvien1)">
+                <input type="password" id="login-password" class="login-input" placeholder="Mật khẩu">
+                <button onclick="submitLogin()" class="btn btn-primary login-btn">ĐĂNG NHẬP</button>
+                <p class="login-note">Chưa có tài khoản? <a href="#" onclick="toggleForm('register')" style="color: var(--primary); font-weight: bold;">Đăng ký ngay</a></p>
+            </div>
+
+            <!-- FORM ĐĂNG KÝ (Mặc định ẩn) -->
+            <div id="form-register" style="display: none;">
+                <p class="login-subtitle">Tạo tài khoản sinh viên mới</p>
+                <input type="text" id="reg-fullname" class="login-input" placeholder="Họ và tên thật (VD: Nguyễn Văn A)">
+                <input type="text" id="reg-username" class="login-input" placeholder="Tên đăng nhập viết liền">
+                <input type="password" id="reg-password" class="login-input" placeholder="Mật khẩu">
+                <button onclick="submitRegister()" class="btn btn-success login-btn">ĐĂNG KÝ TÀI KHOẢN</button>
+                <p class="login-note">Đã có tài khoản? <a href="#" onclick="toggleForm('login')" style="color: var(--primary); font-weight: bold;">Đăng nhập</a></p>
+            </div>
             
-            <button onclick="submitLogin()" class="btn btn-primary login-btn">ĐĂNG NHẬP</button>
             <button onclick="loginAsGuest()" class="btn btn-secondary login-btn login-btn-secondary">Vào xem với Tư cách Khách</button>
-            
-            <p class="login-note">(Tài khoản mới sẽ tự động được tạo. <br>Mật khẩu mặc định của Admin là: <b>123456</b>)</p>
         </div>
     </div>
 

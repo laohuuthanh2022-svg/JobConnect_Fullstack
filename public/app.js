@@ -1,5 +1,43 @@
 let currentUser = null;
+// ==========================================
+// CHUYỂN ĐỔI FORM ĐĂNG NHẬP / ĐĂNG KÝ
+// ==========================================
+function toggleForm(type) {
+    if(type === 'register') {
+        document.getElementById('form-login').style.display = 'none';
+        document.getElementById('form-register').style.display = 'block';
+    } else {
+        document.getElementById('form-register').style.display = 'none';
+        document.getElementById('form-login').style.display = 'block';
+    }
+}
 
+// ==========================================
+// XỬ LÝ ĐĂNG KÝ TÀI KHOẢN
+// ==========================================
+async function submitRegister() {
+    const fullname = document.getElementById('reg-fullname').value;
+    const username = document.getElementById('reg-username').value;
+    const password = document.getElementById('reg-password').value;
+
+    if(!fullname || !username || !password) { alert("Vui lòng nhập đủ thông tin!"); return; }
+
+    const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullname, username, password })
+    });
+    const data = await res.json();
+
+    if(data.success) {
+        alert("Đăng ký thành công! Hãy đăng nhập để tiếp tục.");
+        toggleForm('login');
+        document.getElementById('login-username').value = username;
+        document.getElementById('login-password').value = password;
+    } else {
+        alert(data.message);
+    }
+}
 // Xóa localStorage cũ để test form đăng nhập mới
 localStorage.removeItem('Username');
 

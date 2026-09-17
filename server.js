@@ -12,7 +12,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 function readDB() { return JSON.parse(fs.readFileSync('./database.json', 'utf8')); }
 function writeDB(data) { fs.writeFileSync('./database.json', JSON.stringify(data, null, 2), 'utf8'); }
+// API Đăng ký tài khoản mới
+app.post('/api/register', (req, res) => {
+    const { fullname, username, password } = req.body;
+    let db = readDB();
 
+    if (!fullname || !username || !password) {
+        return res.status(400).json({ success: false, message: 'Vui lòng nhập đủ thông tin!' });
+    }
+    
+    if (db.users[username]) {
+        return res.status(400).json({ success: false, message: 'Tên đăng nhập này đã có người sử dụng!' });
+    }
+
+    // Tạo tài khoản mới, tặng sẵn 0đ
+    db.users[username] = { 
+        username: username, 
+        password: password, 
+        fullname: fullname, 
+        wallet: 0, 
+        role: "user", 
+        kyc: "pending" 
+    };
+    
+    writeDB(db);
+    res.json({ success: true, message: 'Đăng ký thành công!' });
+});
 // 1. API Đăng nhập (Có Mật khẩu)
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
